@@ -54,6 +54,10 @@ public class ApproximationTable {
 	private boolean BinCreation() {
 		try {
 			PreparedStatement preparedStatement = con.prepareStatement("ALTER TABLE " + approxTableName + " ADD bin INT DEFAULT -1;");
+			preparedStatement.execute();
+			
+			int numberOfBins = (int) (numberOfSamples / Math.log(numberOfSamples) + 1);
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
