@@ -27,7 +27,7 @@ public class ApproximationTable {
 	//Sampling original table and creating a new one
 	//Sampling methods: Random
 	boolean OriginalTableSampling() {
-		switch (samplingMethod) {
+		switch (samplingMethod) { 
 			case "Random":
 				try {
 					PreparedStatement preparedStatement = con.prepareStatement("SELECT COUNT(*) FROM " + originalTableName + ";");
