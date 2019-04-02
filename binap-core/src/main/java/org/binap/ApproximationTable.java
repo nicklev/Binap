@@ -11,6 +11,7 @@ public class ApproximationTable {
 	private String samplingMethod;
 	private Connection con;
 	private int numberOfSamples;
+	private double binInterval;
 	
 	public ApproximationTable(String approxTableName, String originalTableName,	String leaderColumn, String samplingMethod, Connection con) {
 		this.approxTableName = approxTableName;
@@ -52,12 +53,38 @@ public class ApproximationTable {
 	}
 
 	private boolean BinCreation() {
+		PreparedStatement preparedStatement;
+		ResultSet rs;
+		int numberOfBins;
+		double minValue, maxValue;
+		
 		try {
-			PreparedStatement preparedStatement = con.prepareStatement("ALTER TABLE " + approxTableName + " ADD bin INT DEFAULT -1;");
+			preparedStatement = con.prepareStatement("ALTER TABLE " + approxTableName + " ADD bin INT DEFAULT -1;");
 			preparedStatement.execute();
 			
-			int numberOfBins = (int) (numberOfSamples / Math.log(numberOfSamples) + 1);
+			numberOfBins = (int) (numberOfSamples / Math.log(numberOfSamples) + 1);
 			
+			preparedStatement = con.prepareStatement("SELECT MIN("+ leaderColumn +"), MAX("+ leaderColumn +"), FROM "+ approxTableName +";");
+			rs = preparedStatement.executeQuery();
+			rs.next();
+			minValue = rs.getDouble(1);
+			maxValue = rs.getDouble(2);
+			
+			binInterval = (maxValue - minValue)/numberOfBins;		
+			AssignRowsInBins();			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean AssignRowsInBins() {
+		PreparedStatement preparedStatement;
+		
+		try {
+			preparedStatement = con.prepareStatement("UPDATE "+ approxTableName +" SET bin = "+ leaderColumn + " DIV " + binInterval +";");
+			preparedStatement.execute();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
