@@ -13,6 +13,7 @@ public class ApproximationTable {
 	private int numberOfSamples;
 	private double binInterval;
 	
+	//TODO: check if table name already exists
 	public ApproximationTable(String approxTableName, String originalTableName,	String leaderColumn, String samplingMethod, Connection con) {
 		this.approxTableName = approxTableName;
 		this.originalTableName = originalTableName;
@@ -22,6 +23,25 @@ public class ApproximationTable {
 	}
 	
 	private boolean MetadataCreation() {
+		PreparedStatement preparedStatement;
+		
+		try {
+			preparedStatement = con.prepareStatement("CREATE DATABASE IF NOT EXISTS metadata");
+			preparedStatement.execute();
+			
+			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS metadata (id int NOT NULL AUTO_INCREMENT, table_name VARVHAR(255), sampling_method VARCHAR(255), numberOfSamples int, sampling_percentage float);");
+			preparedStatement.execute();
+			
+			preparedStatement = con.prepareStatement("INSERT INTO metadata (table_name, sampling_method, numberOfSamples, sampling_percentage) VALUES (?,?,?,?);");
+			preparedStatement.setString(1, approxTableName);
+			preparedStatement.setString(2, samplingMethod);
+			preparedStatement.setInt(3, numberOfSamples);
+			preparedStatement.setFloat(4, SAMPLING_PERCENTAGE);
+			preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 		return true;
 	}
 	
@@ -52,7 +72,7 @@ public class ApproximationTable {
 		return true;
 	}
 
-	private boolean BinCreation() {
+	boolean BinCreation() {
 		PreparedStatement preparedStatement;
 		ResultSet rs;
 		int numberOfBins;
@@ -71,7 +91,8 @@ public class ApproximationTable {
 			maxValue = rs.getDouble(2);
 			
 			binInterval = (maxValue - minValue)/numberOfBins;		
-			AssignRowsInBins();			
+			AssignRowsInBins();
+			MetadataCreation();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
