@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//TODO: the column in the Aggregation clause must be the same with the Where clause
 public class SqlRewritting {
 
-	private static String[] aggregateFunctions = {"sum", "count"};
+	private static String[] aggregateFunctions = {"SUM", "COUNT"};
+	private List<Pattern> patterns = new ArrayList<>();
 	private String query;
 	private String rewrittenQuery;
 	private String[] splittedQuery;
@@ -31,6 +33,8 @@ public class SqlRewritting {
 		};
 		splittedQuery = query.split(" ");
 		
+		patterns.add(Pattern.compile("(SUM)"));
+		patterns.add(Pattern.compile("(COUNT"));		
 	}
 	
 	boolean IsQueryAqpValid() {
@@ -75,5 +79,33 @@ public class SqlRewritting {
 		
 		return false;
 	}
+	
+//	String Rewritter() {
+//		String rewrittenSql = "";
+//		boolean where = false;
+//		Pattern pattern;
+//		Matcher m;
+//		
+//		if (IsQueryAqpValid()) {
+//			for (String str : splittedQuery) {
+//				if (str == "WHERE") {
+//					where = true;
+//				}
+//				else if (where == true && str != "BETWEEN") {
+//					rewrittenSql += BinCalculation()
+//				}
+//				else {
+//					rewrittenSql += str + " ";
+//				}
+//			}
+//		}
+//		return rewrittenSql;
+//	}
+//	
+//	private int BinCalculation(int {
+//		int bin = 0;
+//		
+//		return bin;
+//	}
 	
 }
