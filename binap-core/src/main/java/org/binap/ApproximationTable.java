@@ -29,15 +29,16 @@ public class ApproximationTable {
 			preparedStatement = con.prepareStatement("CREATE DATABASE IF NOT EXISTS metadata");
 			preparedStatement.execute();
 			
-			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS metadata (id int NOT NULL AUTO_INCREMENT, table_name VARVHAR(255), sampling_method VARCHAR(255), numberOfSamples int, sampling_percentage float, leader_column VARCHAR(255));");
+			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS metadata (id int NOT NULL AUTO_INCREMENT, table_name VARVHAR(255), original_table_name VARCHAR(255), sampling_method VARCHAR(255), numberOfSamples int, sampling_percentage float, leader_column VARCHAR(255));");
 			preparedStatement.execute();
 			
-			preparedStatement = con.prepareStatement("INSERT INTO metadata (table_name, sampling_method, numberOfSamples, sampling_percentage, leader_column) VALUES (?,?,?,?,?);");
+			preparedStatement = con.prepareStatement("INSERT INTO metadata (table_name, original_table_name, sampling_method, numberOfSamples, sampling_percentage, leader_column) VALUES (?,?,?,?,?,?);");
 			preparedStatement.setString(1, approxTableName);
-			preparedStatement.setString(2, samplingMethod);
-			preparedStatement.setInt(3, numberOfSamples);
-			preparedStatement.setFloat(4, SAMPLING_PERCENTAGE);
-			preparedStatement.setString(5, leaderColumn);
+			preparedStatement.setString(2, originalTableName);
+			preparedStatement.setString(3, samplingMethod);
+			preparedStatement.setInt(4, numberOfSamples);
+			preparedStatement.setFloat(5, SAMPLING_PERCENTAGE);
+			preparedStatement.setString(6, leaderColumn);
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
