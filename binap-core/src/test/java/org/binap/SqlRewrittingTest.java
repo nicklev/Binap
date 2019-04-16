@@ -36,4 +36,13 @@ class SqlRewrittingTest {
 				
 		assertEquals("id", test);
 	}
+	
+	@Test
+	void BinCalculationTestReturnsTrue() {
+		int columnId = 5;
+		int expected;
+		String query = "SELECT SUM(id) FROM test_table WHERE id BETWEEN 5 AND 10";
+		SqlRewritting sqlRewritting = new SqlRewritting(query);
+		int real = sqlRewritting.BinCalculation(columnId);
+	}
 }

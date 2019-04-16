@@ -21,9 +21,11 @@ public class SqlRewritting {
 	static String pass = "";
 	static String url = "jdbc:mysql://localhost:3306/metadata?autoReconnect=true&useSSL=false";
 	private Connection con;
+	private int indexOfTable;
 	
 	
 	public SqlRewritting(String query) {
+		int indexOfFrom = -1;
 		this.query = query;
 		try {
 			DatabaseConnection dc = new DatabaseConnection(url, name, pass);
@@ -32,11 +34,23 @@ public class SqlRewritting {
 			e.printStackTrace();
 		};
 		splittedQuery = query.split(" ");
+		//find the index of table in the query
+		for (String str : splittedQuery) {
+			if (str.equalsIgnoreCase("FROM"))
+			{
+				break;
+			}
+			indexOfFrom++;
+		}
+		
+		indexOfTable = indexOfFrom + 1;
 		
 		patterns.add(Pattern.compile("(SUM)"));
 		patterns.add(Pattern.compile("(COUNT"));		
 	}
 	
+	//check if query is valid
+	//double check: column and table are in metadata
 	boolean IsQueryAqpValid() {
 		int indexOfFrom = 0;
 		int indexOfTable = 0;
@@ -51,17 +65,7 @@ public class SqlRewritting {
 		while(m.find()) {
 		    leaderColumn = m.group(1).toString();
 		}
-		
-		for (String str : splittedQuery) {
-			if (str.equalsIgnoreCase("FROM"))
-			{
-				break;
-			}
-			indexOfFrom++;
-		}
-		
-		indexOfTable = indexOfFrom + 1;
-		
+				
 		try {
 			preparedStatement = con.prepareStatement("SELECT table_name FROM metadata WHERE table_name = ? AND leader_column = ?");
 			preparedStatement.setString(1, splittedQuery[indexOfTable]);
@@ -80,32 +84,49 @@ public class SqlRewritting {
 		return false;
 	}
 	
-//	String Rewritter() {
-//		String rewrittenSql = "";
-//		boolean where = false;
-//		Pattern pattern;
-//		Matcher m;
-//		
-//		if (IsQueryAqpValid()) {
-//			for (String str : splittedQuery) {
-//				if (str == "WHERE") {
-//					where = true;
-//				}
-//				else if (where == true && str != "BETWEEN") {
-//					rewrittenSql += BinCalculation()
-//				}
-//				else {
-//					rewrittenSql += str + " ";
-//				}
-//			}
-//		}
-//		return rewrittenSql;
-//	}
-//	
-//	private int BinCalculation(int {
-//		int bin = 0;
-//		
-//		return bin;
-//	}
+	String Rewritter() {
+		String rewrittenSql = "";
+		boolean where = false;
+		Pattern pattern;
+		Matcher m;
+		
+		if (IsQueryAqpValid()) {
+			for (String str : splittedQuery) {
+				if (str == "WHERE") {
+					where = true;
+				}
+				else if (where == true && str != "BETWEEN") {
+					rewrittenSql += BinCalculation();
+				}
+				else {
+					rewrittenSql += str + " ";
+				}
+			}
+		}
+		return rewrittenSql;
+	}
+	
+	int BinCalculation(int columnId) {
+		int bin = 0;
+		PreparedStatement preparedStatement;
+		ResultSet rs;
+		int numberOfSamples;
+		
+		try {
+			preparedStatement = con.prepareStatement("SELECT number_of_samples FROM metadata WHERE table_name = ?");
+			preparedStatement.setString(1, splittedQuery[indexOfTable]);
+			rs = preparedStatement.executeQuery();
+			rs.next();
+			
+			numberOfSamples = rs.getInt(1);
+			bin = (int) (columnId / Math.log(numberOfSamples));
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return bin;
+	}
 	
 }
