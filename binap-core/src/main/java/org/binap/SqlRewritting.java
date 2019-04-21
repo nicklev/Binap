@@ -46,7 +46,7 @@ public class SqlRewritting {
 		indexOfTable = indexOfFrom + 1;
 		
 		patterns.add(Pattern.compile("(SUM)"));
-		patterns.add(Pattern.compile("(COUNT"));		
+		patterns.add(Pattern.compile("(COUNT)"));		
 	}
 	
 	//check if query is valid
@@ -94,9 +94,10 @@ public class SqlRewritting {
 			for (String str : splittedQuery) {
 				if (str == "WHERE") {
 					where = true;
+					rewrittenSql += str + " ";
 				}
 				else if (where == true && str != "BETWEEN") {
-					rewrittenSql += BinCalculation();
+					rewrittenSql += BinCalculation(Integer.parseInt(str)) + " ";
 				}
 				else {
 					rewrittenSql += str + " ";
@@ -122,7 +123,6 @@ public class SqlRewritting {
 			bin = (int) (columnId / Math.log(numberOfSamples));
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
