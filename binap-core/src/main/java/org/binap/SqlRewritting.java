@@ -33,6 +33,7 @@ public class SqlRewritting {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		};
+		
 		splittedQuery = query.split(" ");
 		//find the index of table in the query
 		for (String str : splittedQuery) {
@@ -103,7 +104,11 @@ public class SqlRewritting {
 					rewrittenSql += str + " ";
 				}
 			}
+		} else {
+			System.out.println("The query is not valid for AQP.");
+			rewrittenSql = splittedQuery.toString();
 		}
+		
 		return rewrittenSql;
 	}
 	

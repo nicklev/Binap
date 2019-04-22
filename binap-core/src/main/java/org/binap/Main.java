@@ -1,6 +1,7 @@
 package org.binap;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -33,6 +34,7 @@ public class Main {
 		String pass = "";
 		String url = "jdbc:mysql://localhost:3306/binap?autoReconnect=true&useSSL=false";
 		DatabaseConnection databaseConnection;
+		PreparedStatement preparedStatement;
 		Connection con = null;
 		try {
 			databaseConnection = new DatabaseConnection(url, name, pass);
@@ -58,7 +60,14 @@ public class Main {
 					break;
 				case "2":
 					query = printInsert("Insert a SQL query: ");
-					
+					SqlRewritting sqlRewritting = new SqlRewritting(query);
+					String rewrittenQuery = sqlRewritting.Rewritter();
+					try {
+						preparedStatement = con.prepareStatement(rewrittenQuery);
+						preparedStatement.execute();
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
 					break;
 				case "3":
 					System.out.println("Exiting the program...");
