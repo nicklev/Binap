@@ -92,11 +92,11 @@ public class SqlRewritting {
 		
 		if (IsQueryAqpValid()) {
 			for (String str : splittedQuery) {
-				if (str == "WHERE") {
+				if (str.equalsIgnoreCase("WHERE")) {
 					where = true;
 					rewrittenSql += str + " ";
 				}
-				else if (where == true && str != "BETWEEN") {
+				else if (where == true && !str.equalsIgnoreCase("BETWEEN")) {
 					rewrittenSql += BinCalculation(Integer.parseInt(str)) + " ";
 				}
 				else {
