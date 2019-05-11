@@ -15,10 +15,11 @@ public class Main {
 	
 	static String printInsert(String message) {
 		Scanner userInput = new Scanner(System.in);
-		String input;
+		String input = null;
 		System.out.println(message);
+		
 		input = userInput.nextLine();
-		userInput.close();
+
 		return input;
 	}
 	
@@ -75,7 +76,7 @@ public class Main {
 				default:
 					break;
 			}
-		} while(!userInput.toString().equals("3"));
+		} while(!input.equals("3"));
 		
 	}
 

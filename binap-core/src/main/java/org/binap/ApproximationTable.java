@@ -9,13 +9,12 @@ public class ApproximationTable {
 	private String originalTableName;
 	private String leaderColumn;
 	private String samplingMethod = null;
-	private Connection metadataConnection;
 	private Connection userDatabaseConnection;
 	private int numberOfSamples;
 	private double binInterval;
-	private static String name = "root";
-	private static String pass = "";
-	private static String url = "jdbc:mysql://localhost:3306/?autoReconnect=true&useSSL=false";
+//	private static String name = "root";
+//	private static String pass = "";
+//	private static String url = "jdbc:mysql://localhost:3306/metadata?autoReconnect=true&useSSL=false";
 	
 	//TODO: check if table name already exists
 	public ApproximationTable(String approxTableName, String originalTableName,	String leaderColumn, String samplingMethod, Connection userDatabaseConnection) {
@@ -24,11 +23,6 @@ public class ApproximationTable {
 		this.leaderColumn = leaderColumn;
 		this.samplingMethod = samplingMethod;
 		this.userDatabaseConnection = userDatabaseConnection;
-		try {
-			this.metadataConnection = DriverManager.getConnection(url, name, pass);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} ;
 	}
 	
 	//Creates bin column, calculates total number of bins and
@@ -49,7 +43,7 @@ public class ApproximationTable {
 
 			numberOfBins = (int) (numberOfSamples / Math.log(numberOfSamples) + 1);
 
-			preparedStatement = userDatabaseConnection.prepareStatement("SELECT MIN("+ leaderColumn +"), MAX("+ leaderColumn +"), FROM "+ approxTableName +";");
+			preparedStatement = userDatabaseConnection.prepareStatement("SELECT MIN("+ leaderColumn +"), MAX("+ leaderColumn +") FROM "+ approxTableName +";");
 			rs = preparedStatement.executeQuery();
 			rs.next();
 			minValue = rs.getDouble(1);
@@ -74,13 +68,15 @@ public class ApproximationTable {
 		PreparedStatement preparedStatement;
 		
 		try {
-			preparedStatement = metadataConnection.prepareStatement("CREATE DATABASE IF NOT EXISTS metadata");
+			preparedStatement = userDatabaseConnection.prepareStatement("CREATE DATABASE IF NOT EXISTS metadata");
 			preparedStatement.execute();
 			
-			preparedStatement = metadataConnection.prepareStatement("CREATE TABLE IF NOT EXISTS metadata (id int NOT NULL AUTO_INCREMENT, table_name VARVHAR(255), original_table_name VARCHAR(255), sampling_method VARCHAR(255), number_of_samples int, sampling_percentage float, leader_column VARCHAR(255));");
+			userDatabaseConnection.setCatalog("metadata");
+			
+			preparedStatement = userDatabaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS metadata (id int NOT NULL AUTO_INCREMENT, table_name VARCHAR(255), original_table_name VARCHAR(255), sampling_method VARCHAR(255), number_of_samples int, sampling_percentage float, leader_column VARCHAR(255), PRIMARY KEY (id));");
 			preparedStatement.execute();
 			
-			preparedStatement = metadataConnection.prepareStatement("INSERT INTO metadata (table_name, original_table_name, sampling_method, number_of_samples, sampling_percentage, leader_column) VALUES (?,?,?,?,?,?);");
+			preparedStatement = userDatabaseConnection.prepareStatement("INSERT INTO metadata (table_name, original_table_name, sampling_method, number_of_samples, sampling_percentage, leader_column) VALUES (?,?,?,?,?,?);");
 			preparedStatement.setString(1, approxTableName);
 			preparedStatement.setString(2, originalTableName);
 			preparedStatement.setString(3, samplingMethod);
@@ -97,7 +93,7 @@ public class ApproximationTable {
 	
 	//Sampling original table and creating a new one
 	//Sampling methods: Random
-	//TODO: add more sampling methods and create user input if sampling method doesn't exists
+	//TODO: add more sampling methods and create user input if sampling method doesn't exist
 	boolean OriginalTableSampling() {
 		switch (samplingMethod) { 
 			case "Random":
